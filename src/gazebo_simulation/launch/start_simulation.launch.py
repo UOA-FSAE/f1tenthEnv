@@ -15,7 +15,7 @@ gz_to_ros_message_type = {
 }
 
 gz_launch_file = 'f1tenth_track_sdf/f1tenth_world.sdf'
-hz = '3000'
+hz = '1000'
 
 
 def generate_launch_description():
@@ -36,7 +36,6 @@ def generate_launch_description():
         executable='parameter_bridge',
         arguments=[
             f'/lidar@{gz_to_ros_message_type["gz.msgs.LaserScan"]}@gz.msgs.LaserScan',
-            f'/wall/touched@{gz_to_ros_message_type["gz.msgs.LaserScan"]}@gz.msgs.LaserScan',
             f'/cmd_vel@{gz_to_ros_message_type["gz.msgs.Twist"]}@gz.msgs.Twist',
             f'/imu@{gz_to_ros_message_type["gz.msgs.IMU"]}@gz.msgs.IMU',
             f'/navsat@{gz_to_ros_message_type["gz.msgs.NavSat"]}@gz.msgs.NavSat',
