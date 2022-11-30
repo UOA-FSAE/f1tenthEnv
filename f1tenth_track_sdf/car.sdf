@@ -1,0 +1,322 @@
+<?xml version="1.0" ?>
+<sdf version="1.10">
+	<model name="f1tenth">
+		<static>false</static>
+		<pose>0 0 0.1 0 0 0</pose>
+
+
+		
+		<!-- CHASSIS______________________________________________________________________________________________________ -->
+		<link name="chassis">
+			<sensor name="imu_sensor" type="imu">
+				<always_on>1</always_on>
+				<update_rate>1</update_rate>
+				<visualize>true</visualize>
+				<topic>imu</topic>
+			</sensor>
+
+
+			<sensor name="navsat" type="navsat">
+			  <always_on>1</always_on>
+			  <topic>navsat</topic>
+			</sensor>
+
+			<pose relative_to='__model__'>0 0 0 0 0 3.14</pose>
+			<visual name="chassis_visual">
+				<geometry>
+					<mesh><uri>file://f1tenth_track_sdf/chassis.stl</uri><scale>0.1 0.1 0.1</scale></mesh>
+				</geometry>
+				<material>
+					<ambient>0.0 0.0 0.5 1</ambient>
+					<diffuse>0.0 0.0 0.5 1</diffuse>
+					<specular>0 0 0 1</specular>
+				</material>
+			</visual>
+			<inertial> <!--inertial properties of the link mass, inertia matix-->
+				<mass>4</mass>
+				<inertia>
+					<ixx>0.010609</ixx>
+					<ixy>0</ixy>
+					<ixz>0</ixz>
+					<iyy>0.050409</iyy>
+					<iyz>0</iyz>
+					<izz>0.05865</izz>
+				</inertia>
+			</inertial>
+			<collision name='chassis_collision'>
+				<pose>0 0 1 0 0 0</pose>
+				<geometry>
+					<box>
+						<size>0.5 0.3 0.2</size>
+					</box>
+				</geometry>
+			</collision>
+			
+			
+		</link>
+		
+
+		<!-- LIDAR SENSOR  _________________________________________________________________________________________________ -->
+		
+		<link name="lidar">
+			<pose relative_to='chassis'>-0.25 0 0.05 0 0 3.14</pose>
+			<static>true</static>
+			<visual name="lidar_visual">
+				<geometry>
+					<mesh><uri>file://f1tenth_track_sdf/lidar.stl</uri><scale>0.1 0.1 0.1</scale></mesh>
+				</geometry>
+			</visual>
+			<collision name="lidar_collision">
+				<geometry>
+					<sphere>
+						<radius>0.02</radius>
+					</sphere>
+				</geometry>
+			</collision>
+			<sensor name='gpu_lidar' type='gpu_lidar'>"
+				<pose relative_to='lidar'>0 0 0 0 0 0</pose>
+				<topic>lidar</topic>
+				<update_rate>10</update_rate>
+				<ray>
+					<scan>
+						<horizontal>
+							<samples>640</samples>
+							<resolution>1</resolution>
+							<min_angle>-2.094395</min_angle>
+							<max_angle>2.094395</max_angle>
+						</horizontal>
+						<vertical>
+							<samples>1</samples>
+							<resolution>0.01</resolution>
+							<min_angle>0</min_angle>
+							<max_angle>0</max_angle>
+						</vertical>
+					</scan>
+					<range>
+						<min>0.08</min>
+						<max>10.0</max>
+						<resolution>0.01</resolution>
+					</range>
+				</ray>
+				<always_on>1</always_on>
+				<visualize>true</visualize>
+			</sensor>
+		
+		</link>
+		<!-- FRONT RIGHT WHEEL _____________________________________________________________________________________________ -->
+		<link name="front_right_wheel">
+			<pose relative_to="chassis">-0.15 0.15 0.025 -1.5707 0 0</pose>
+			<visual name="fr_wheel_visual">
+				<geometry>
+					<mesh><uri>file://f1tenth_track_sdf/wheel.stl</uri><scale>0.1 0.1 0.1</scale></mesh>
+				</geometry>
+				<material>
+            				<ambient>1.0 0.0 0.0 1</ambient>
+            				<diffuse>1.0 0.0 0.0 1</diffuse>
+            				<specular>1 1 1 1</specular>
+        			</material>
+			</visual>
+			<inertial> <!--inertial properties of the link mass, inertia matix-->
+				<mass>0.34055</mass>
+				<inertia>
+					<ixx>0.00026046</ixx>
+					<ixy>0</ixy>
+					<ixz>0</ixz>
+					<iyy>0.00026046</iyy>
+					<iyz>0</iyz>
+					<izz>0.00041226</izz>
+				</inertia>
+    			</inertial>
+			
+			<collision name="front_right_wheel_collision">
+				<pose>0 0 -0.02 0 0 0</pose>
+				<geometry>
+					<cylinder>
+						<radius>0.05</radius>
+						<length>0.05</length>
+					</cylinder>
+				</geometry>
+			</collision>
+		</link>
+		
+		<!-- BACK RIGHT WHEEL _____________________________________________________________________________________________ -->
+		<link name="back_right_wheel">
+			<pose relative_to="chassis">0.175 0.15 0.025 -1.5707 0 0</pose>
+			<visual name="fr_wheel_visual">
+				<geometry>
+					<mesh><uri>file://f1tenth_track_sdf/wheel.stl</uri><scale>0.1 0.1 0.1</scale></mesh>
+				</geometry>
+				<material>
+            				<ambient>1.0 0.0 0.0 1</ambient>
+            				<diffuse>1.0 0.0 0.0 1</diffuse>
+            				<specular>1 1 1 1</specular>
+        			</material>
+			</visual>
+			<inertial> <!--inertial properties of the link mass, inertia matix-->
+				<mass>0.34055</mass>
+				<inertia>
+					<ixx>0.00026046</ixx>
+					<ixy>0</ixy>
+					<ixz>0</ixz>
+					<iyy>0.00026046</iyy>
+					<iyz>0</iyz>
+					<izz>0.00041226</izz>
+				</inertia>
+    			</inertial>
+			
+			<collision name="front_right_wheel_collision">
+				<pose>0 0 -0.02 0 0 0</pose>
+				<geometry>
+					<cylinder>
+						<radius>0.05</radius>
+						<length>0.05</length>
+					</cylinder>
+				</geometry>
+			</collision>
+		</link>
+		<!-- FRONT LEFT WHEEL _____________________________________________________________________________________________ -->
+		<link name="front_left_wheel">
+			<pose relative_to="chassis">-0.15 -0.1 0.025 -1.5707 0 0</pose>
+			<visual name="fl_wheel_visual">
+				<geometry>
+					<mesh><uri>file://f1tenth_track_sdf/wheel.stl</uri><scale>0.1 0.1 0.1</scale></mesh>
+				</geometry>
+				<material>
+            				<ambient>1.0 0.0 0.0 1</ambient>
+            				<diffuse>1.0 0.0 0.0 1</diffuse>
+            				<specular>1 1 1 1</specular>
+        			</material>
+			</visual>
+			<inertial> <!--inertial properties of the link mass, inertia matix-->
+				<mass>0.34055</mass>
+				<inertia>
+					<ixx>0.00026046</ixx>
+					<ixy>0</ixy>
+					<ixz>0</ixz>
+					<iyy>0.00026046</iyy>
+					<iyz>0</iyz>
+					<izz>0.00041226</izz>
+				</inertia>
+    			</inertial>
+			<collision name="front_left_wheel_collision">
+				<pose>0 0 -0.025 0 0 0</pose>
+				<geometry>
+					<cylinder>
+						<radius>0.05</radius>
+						<length>0.05</length>
+					</cylinder>
+				</geometry>
+			</collision>
+		</link>
+		
+		<!-- BACK LEFT WHEEL _____________________________________________________________________________________________ -->
+		<link name="back_left_wheel">
+			<pose relative_to="chassis">0.175 -0.1 0.025 -1.5707 0 0</pose>
+			<visual name="fl_wheel_visual">
+				<geometry>
+					<mesh><uri>file://f1tenth_track_sdf/wheel.stl</uri><scale>0.1 0.1 0.1</scale></mesh>
+					
+				</geometry>
+				<material>
+            				<ambient>1.0 0.0 0.0 1</ambient>
+            				<diffuse>1.0 0.0 0.0 1</diffuse>
+            				<specular>1 1 1 1</specular>
+        			</material>
+			</visual>
+			<inertial> <!--inertial properties of the link mass, inertia matix-->
+				<mass>0.34055</mass>
+				<inertia>
+					<ixx>0.00026046</ixx>
+					<ixy>0</ixy>
+					<ixz>0</ixz>
+					<iyy>0.00026046</iyy>
+					<iyz>0</iyz>
+					<izz>0.00041226</izz>
+				</inertia>
+    			</inertial>
+			<collision name="front_left_wheel_collision">
+				<pose>0 0 -0.025 0 0 0</pose>
+				<geometry>
+					<cylinder>
+						<radius>0.05</radius>
+						<length>0.05</length>
+					</cylinder>
+				</geometry>
+			</collision>
+		</link>
+		
+		
+		<!-- JOINTS _____________________________________________________________________________________________________ -->
+		<joint name='front_right_wheel_joint' type='revolute'>
+    			<pose relative_to='front_right_wheel'/>
+    			<parent>chassis</parent>
+    			<child>front_right_wheel</child>
+    			<axis>
+        			<xyz expressed_in='__model__'>0 1 0</xyz> <!--can be defined as any frame or even arbitrary frames-->
+        			<limit>
+            				<lower>-1.79769e+308</lower>    <!--negative infinity-->
+            				<upper>1.79769e+308</upper>     <!--positive infinity-->
+        			</limit>
+    			</axis>
+		</joint>
+		<joint name='back_right_wheel_joint' type='revolute'>
+    			<pose relative_to='back_right_wheel'/>
+    			<parent>chassis</parent>
+    			<child>back_right_wheel</child>
+    			<axis>
+        			<xyz expressed_in='__model__'>0 1 0</xyz> <!--can be defined as any frame or even arbitrary frames-->
+        			<limit>
+            				<lower>-1.79769e+308</lower>    <!--negative infinity-->
+            				<upper>1.79769e+308</upper>     <!--positive infinity-->
+        			</limit>
+    			</axis>
+		</joint>
+		
+		<joint name='front_left_wheel_joint' type='revolute'>
+    			<pose relative_to='front_left_wheel'/>
+    			<parent>chassis</parent>
+    			<child>front_left_wheel</child>
+    			<axis>
+        			<xyz expressed_in='__model__'>0 1 0</xyz> <!--can be defined as any frame or even arbitrary frames-->
+        			<limit>
+            				<lower>-1.79769e+308</lower>    <!--negative infinity-->
+            				<upper>1.79769e+308</upper>     <!--positive infinity-->
+        			</limit>
+    			</axis>
+		</joint>
+		
+		<joint name='back_left_wheel_joint' type='revolute'>
+    			<pose relative_to='back_left_wheel'/>
+    			<parent>chassis</parent>
+    			<child>back_left_wheel</child>
+    			<axis>
+        			<xyz expressed_in='__model__'>0 1 0</xyz> <!--can be defined as any frame or even arbitrary frames-->
+        			<limit>
+            				<lower>-1.79769e+308</lower>    <!--negative infinity-->
+            				<upper>1.79769e+308</upper>     <!--positive infinity-->
+        			</limit>
+    			</axis>
+		</joint>
+		
+		<joint name='lidar_joint' type='fixed'>
+			<parent>chassis</parent>
+			<child>lidar</child>
+		</joint>
+		<!-- PLUGINS _____________________________________________________________________________________________________ -->
+		
+		<plugin
+		filename="libgz-sim-diff-drive-system.so"
+		name="gz::sim::systems::DiffDrive">
+			<left_joint>front_left_wheel_joint</left_joint>
+			<left_joint>back_left_wheel_joint</left_joint>
+			<right_joint>front_right_wheel_joint</right_joint>
+			<right_joint>back_right_wheel_joint</right_joint>
+			<wheel_separation>0.2</wheel_separation>
+			<wheel_radius>0.05</wheel_radius>
+			<odom_publish_frequency>1</odom_publish_frequency>
+			<topic>cmd_vel</topic>
+		</plugin>
+
+
+        </model>
+</sdf>
