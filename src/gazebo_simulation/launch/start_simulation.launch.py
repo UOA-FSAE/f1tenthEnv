@@ -10,7 +10,8 @@ gz_to_ros_message_type = {
     'gz.msgs.LaserScan': 'sensor_msgs/msg/LaserScan',
     'gz.msgs.Twist': 'geometry_msgs/msg/Twist',
     'gz.msgs.IMU': 'sensor_msgs/msg/Imu',
-    'gz.msgs.NavSat': 'sensor_msgs/msg/NavSatFix'
+    'gz.msgs.NavSat': 'sensor_msgs/msg/NavSatFix',
+    'gz.msgs.Boolean': 'std_msgs/msg/Bool',
 }
 
 gz_launch_file = 'f1tenth_track_sdf/f1tenth_world.sdf'
@@ -39,6 +40,7 @@ def generate_launch_description():
             f'/cmd_vel@{gz_to_ros_message_type["gz.msgs.Twist"]}@gz.msgs.Twist',
             f'/imu@{gz_to_ros_message_type["gz.msgs.IMU"]}@gz.msgs.IMU',
             f'/navsat@{gz_to_ros_message_type["gz.msgs.NavSat"]}@gz.msgs.NavSat',
+            f'/reset@{gz_to_ros_message_type["gz.msgs.Boolean"]}@gz.msgs.Boolean',
         ]
 
     )
