@@ -24,7 +24,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'reward_node = gazebo_simulation.reward_node:main',
+            'reward_gate_node = gazebo_simulation.reward_gate_node:main',
             'termination_node = gazebo_simulation.termination_node:main',
         ],
     },

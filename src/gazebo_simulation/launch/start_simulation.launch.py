@@ -44,9 +44,9 @@ def generate_launch_description():
 
     )
 
-    reward_node = Node(
+    reward_gate_node = Node(
         package='gazebo_simulation',
-        executable='reward_node'
+        executable='reward_gate_node'
     )
 
     termination_node = Node(
@@ -57,6 +57,6 @@ def generate_launch_description():
     return LaunchDescription([
         gz_sim,
         gz_bridge,
-        reward_node,
+        reward_gate_node,
         termination_node,
     ])
