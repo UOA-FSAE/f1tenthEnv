@@ -61,6 +61,10 @@ class RewardGateNode(Node):
 
             self.curr_reward_gate = (self.curr_reward_gate + 1) % 15
             self.publisher_reward.publish(pub_msg)
+        else:
+            pub_msg = Int32()
+            pub_msg.data = 0
+            self.publisher_reward.publish(pub_msg)
 
 
 def main(args=None):
