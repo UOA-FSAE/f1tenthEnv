@@ -21,26 +21,26 @@ class AgentEnvNode(Node):
         self.termination_data: bool = Bool().data
 
         # -------------------------- Subscribe topics -------------------------------------------- #
-        self.subcriber_termination = self.create_subscription(
+        self.subscriber_termination = self.create_subscription(
             Bool,
             'termination',
             self.set_termination_callback,
             10
         )
 
-        self.subcriber_lidar = message_filters.Subscriber(self, LaserScan, 'lidar')
-        self.subcriber_imu = message_filters.Subscriber(self, Imu, 'imu')
-        self.subcriber_reward = message_filters.Subscriber(self, Int32, 'reward')
+        self.subscriber_lidar = message_filters.Subscriber(self, LaserScan, 'lidar')
+        self.subscriber_imu = message_filters.Subscriber(self, Imu, 'imu')
+        self.subscriber_reward = message_filters.Subscriber(self, Int32, 'reward')
 
-        self.subcriber_mf = message_filters.ApproximateTimeSynchronizer(
-            [self.subcriber_lidar,
-             self.subcriber_imu,
-             self.subcriber_reward],
+        self.subscriber_mf = message_filters.ApproximateTimeSynchronizer(
+            [self.subscriber_lidar,
+             self.subscriber_imu,
+             self.subscriber_reward],
 
             queue_size=10,
             slop=0.1
         )
-        self.subcriber_mf.registerCallback(self.message_filter_callback)
+        self.subscriber_mf.registerCallback(self.message_filter_callback)
 
         # -------------------------- Publish topics ---------------------------------------------- #
         self.publisher_cmd_vel = self.create_publisher(

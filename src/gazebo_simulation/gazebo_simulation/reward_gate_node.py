@@ -46,7 +46,7 @@ class RewardGateNode(Node):
             10
         )
 
-        self.subcriber_navsat: Subscription = self.create_subscription(
+        self.subscriber_navsat: Subscription = self.create_subscription(
             NavSatFix,
             'navsat',
             self.listener_callback,

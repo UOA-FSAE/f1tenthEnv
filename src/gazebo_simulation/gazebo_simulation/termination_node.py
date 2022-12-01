@@ -36,13 +36,13 @@ class TerminationNode(Node):
             10
         )
 
-        self.subcriber_lidar: Subscription = self.create_subscription(
+        self.subscriber_lidar: Subscription = self.create_subscription(
             LaserScan,
             'lidar',
             self.lidar_callback,
             10
         )
-        self.subcriber_reward: Subscription = self.create_subscription(
+        self.subscriber_reward: Subscription = self.create_subscription(
             Int32,
             'reward',
             self.reward_callback,
