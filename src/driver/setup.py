@@ -20,7 +20,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'actor_node = driver.agent_node:main'
+            'agent_env_node = driver.agent_env_node:main'
         ],
     },
 )
