@@ -11,7 +11,7 @@ def generate_launch_description():
 
     gz_sim = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
-            os.path.join(pkg_gazebo_simulation, 'launch', 'start_simulation.launch.py')),
+            os.path.join(pkg_gazebo_simulation, 'start_simulation.launch.py')),
     )
 
     return LaunchDescription([
