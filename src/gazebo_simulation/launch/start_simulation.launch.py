@@ -54,9 +54,16 @@ def generate_launch_description():
         executable='termination_node'
     )
 
+    reset_node = Node(
+        package='gazebo_simulation',
+        executable='reset_node',
+        output='screen'
+    )
+
     return LaunchDescription([
         gz_sim,
         gz_bridge,
         reward_gate_node,
         termination_node,
+        reset_node
     ])

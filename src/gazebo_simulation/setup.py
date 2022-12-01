@@ -26,6 +26,7 @@ setup(
         'console_scripts': [
             'reward_gate_node = gazebo_simulation.reward_gate_node:main',
             'termination_node = gazebo_simulation.termination_node:main',
+            'reset_node = gazebo_simulation.reset_node:main',
         ],
     },
 )

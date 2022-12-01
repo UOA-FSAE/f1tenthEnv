@@ -60,7 +60,6 @@
 		
 		<link name="lidar">
 			<pose relative_to='chassis'>-0.25 0 0.05 0 0 3.14</pose>
-			<static>true</static>
 			<visual name="lidar_visual">
 				<geometry>
 					<mesh><uri>file://f1tenth_track_sdf/lidar.stl</uri><scale>0.1 0.1 0.1</scale></mesh>
