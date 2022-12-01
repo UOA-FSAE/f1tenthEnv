@@ -49,6 +49,12 @@ class AgentEnvNode(Node):
             10
         )
 
+        self.publisher_reset = self.create_publisher(
+            Bool,
+            'reset',
+            10
+        )
+
     def set_termination_callback(self, termination_msg: Bool):
         if not self.termination_data:
             self.termination_data = termination_msg.data
@@ -74,6 +80,11 @@ class AgentEnvNode(Node):
         twist_msg.angular = vec3_angle
 
         self.publisher_cmd_vel.publish(twist_msg)
+
+    def reset_env_request(self):
+        reset_msg = Bool()
+        reset_msg.data = True
+        self.publisher_reset.publish(reset_msg)
 
 
 def main(args=None):
