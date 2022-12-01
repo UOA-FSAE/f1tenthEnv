@@ -1,16 +1,23 @@
+""" ROS2 node for giving rewards for reward gates during simulation
+
+This node will read the NavSatFix and check that if it has entered a reward gate it will return
+a reward.
+
+"""
+
 import rclpy
 from rclpy.node import Node
 from rclpy.publisher import Publisher
 from rclpy.subscription import Subscription
 
-from std_msgs.msg import Bool
+from std_msgs.msg import Int32
 from sensor_msgs.msg import NavSatFix
 
 
-class RewardNode(Node):
+class RewardGateNode(Node):
 
     def __init__(self):
-        super().__init__('reward_node')
+        super().__init__('reward_gate_node')
 
         self.curr_reward_gate: int = 0
 
@@ -34,7 +41,7 @@ class RewardNode(Node):
         }
 
         self.publisher_reward: Publisher = self.create_publisher(
-            Bool,
+            Int32,
             'reward',
             10
         )
@@ -47,26 +54,26 @@ class RewardNode(Node):
         )
 
     def listener_callback(self, sub_msg: NavSatFix) -> None:
-        pub_msg = Bool()
-
         lat_start, lat_end, log_start, log_end = self.reward_gates[self.curr_reward_gate]
-        pub_msg.data = (lat_start <= sub_msg.latitude <= lat_end) and (log_start <= sub_msg.longitude <= log_end)
+        if (lat_start <= sub_msg.latitude <= lat_end) and (log_start <= sub_msg.longitude <= log_end):
+            pub_msg = Int32()
+            pub_msg.data = 10
 
-        self.curr_reward_gate = ((self.curr_reward_gate + 1) % 15) if pub_msg.data else self.curr_reward_gate
-        self.publisher_reward.publish(pub_msg) if pub_msg.data else None
+            self.curr_reward_gate = (self.curr_reward_gate + 1) % 15
+            self.publisher_reward.publish(pub_msg)
 
 
 def main(args=None):
     rclpy.init(args=args)
 
-    reward_node = RewardNode()
+    reward_gate_node = RewardGateNode()
 
-    rclpy.spin(reward_node)
+    rclpy.spin(reward_gate_node)
 
     # Destroy the node explicitly
     # (optional - otherwise it will be done automatically
     # when the garbage collector destroys the node object)
-    reward_node.destroy_node()
+    reward_gate_node.destroy_node()
     rclpy.shutdown()
 
 
