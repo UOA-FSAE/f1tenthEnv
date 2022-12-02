@@ -55,13 +55,16 @@ class EnvDataServiceNode(Node):
         pass
 
     def message_filter_callback(self, lidar_msg, imu_msg):
-        pass
+        self.lidar_data = lidar_msg
+        self.imu_data = imu_msg
 
     def reward_callback(self, reward_msg):
-        pass
+        if self.reward_data.data == 0:
+            self.reward_data = reward_msg
 
     def termination_callback(self, termination_msg):
-        pass
+        if not self.termination_data.data:
+            self.termination_data = termination_msg
 
 
 def main(args=None):
