@@ -57,7 +57,7 @@ class AgentEnvNode(Node):
 
     def set_termination_callback(self, termination_msg: Bool):
         if not self.termination_data:
-            self.termination_data = termination_msg.data
+            self.termination_data = termination_msg.data if not self.termination_data else self.termination_data
 
     def message_filter_callback(self, lidar_msg: LaserScan, imu_msg: Imu, reward_msg: Int32):
         self.lidar_data = lidar_msg.ranges
@@ -82,6 +82,11 @@ class AgentEnvNode(Node):
         self.publisher_cmd_vel.publish(twist_msg)
 
     def reset_env_request(self):
+        self.reward_data = 0
+        self.termination_data = False
+
+        rclpy.spin_once(self)
+
         reset_msg = Bool()
         reset_msg.data = True
         self.publisher_reset.publish(reset_msg)

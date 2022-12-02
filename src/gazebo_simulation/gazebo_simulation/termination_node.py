@@ -54,7 +54,7 @@ class TerminationNode(Node):
             self.terminate_sim()
 
     def reward_callback(self, sub_msg: Int32) -> None:
-        if sub_msg != 0:
+        if sub_msg.data != 0:
             self.reward_timer.reset()
 
     def timer_callback(self) -> None:
