@@ -1,5 +1,5 @@
 ---
 sensor_msgs/LaserScan lidar
 sensor_msgs/Imu imu
-int64 reward
-bool termination
+std_msgs/Int32 reward
+std_msgs/Bool termination

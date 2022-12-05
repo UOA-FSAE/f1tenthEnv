@@ -24,11 +24,13 @@ if(BUILD_TESTING)
 endif()
 
 find_package(sensor_msgs REQUIRED)
+find_package(std_msgs REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
 
 rosidl_generate_interfaces(${PROJECT_NAME}
   "srv/VehicleEnvData.srv"
   DEPENDENCIES sensor_msgs # Add packages that above messages depend on, in this case geometry_msgs for Sphere.msg
+  DEPENDENCIES std_msgs
 )
 
 ament_package()

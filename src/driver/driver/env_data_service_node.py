@@ -3,6 +3,8 @@ from rclpy.node import Node
 
 from std_msgs.msg import Int32, Bool
 from sensor_msgs.msg import LaserScan, Imu
+from service_interface.srv import VehicleEnvData
+
 import message_filters
 
 
@@ -19,7 +21,7 @@ class EnvDataServiceNode(Node):
 
         # -------------------------- Service ----------------------------------------------------- #
         self.srv = self.create_service(
-            # TODO: Create srv for return lidar, imu, reward, and termination data
+            VehicleEnvData,
             'get_env_data',
             self.get_data_service
         )
@@ -51,7 +53,18 @@ class EnvDataServiceNode(Node):
         self.subscriber_mf.registerCallback(self.message_filter_callback)
 
     def get_data_service(self, request, response):
-        pass
+        print('running service')
+        response.lidar = self.lidar_data
+        print('sent lidar data')
+        response.imu = self.imu_data
+        print('sent imu data')
+        response.reward = self.reward_data
+        print('sent reward data')
+        response.termination = self.termination_data
+        print('sent termination data')
+        print('ending service')
+
+        return response
 
     def message_filter_callback(self, lidar_msg, imu_msg):
         self.lidar_data = lidar_msg
