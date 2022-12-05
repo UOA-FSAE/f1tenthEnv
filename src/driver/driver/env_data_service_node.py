@@ -3,7 +3,6 @@ from rclpy.node import Node
 
 from std_msgs.msg import Int32, Bool
 from sensor_msgs.msg import LaserScan, Imu
-
 import message_filters
 
 
