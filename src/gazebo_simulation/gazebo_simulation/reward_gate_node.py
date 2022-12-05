@@ -10,7 +10,7 @@ from rclpy.node import Node
 from rclpy.publisher import Publisher
 from rclpy.subscription import Subscription
 
-from std_msgs.msg import Int32
+from std_msgs.msg import Int32, Bool
 from sensor_msgs.msg import NavSatFix
 
 
@@ -49,11 +49,18 @@ class RewardGateNode(Node):
         self.subscriber_navsat: Subscription = self.create_subscription(
             NavSatFix,
             'navsat',
-            self.listener_callback,
+            self.navsat_listener_callback,
             10
         )
 
-    def listener_callback(self, sub_msg: NavSatFix) -> None:
+        self.subscriber_reset: Subscription = self.create_subscription(
+            Bool,
+            'reset',
+            self.reset_listener_callback,
+            10
+        )
+
+    def navsat_listener_callback(self, sub_msg: NavSatFix) -> None:
         lat_start, lat_end, log_start, log_end = self.reward_gates[self.curr_reward_gate]
         if (lat_start <= sub_msg.latitude <= lat_end) and (log_start <= sub_msg.longitude <= log_end):
             pub_msg = Int32()
@@ -65,6 +72,10 @@ class RewardGateNode(Node):
             pub_msg = Int32()
             pub_msg.data = 0
             self.publisher_reward.publish(pub_msg)
+
+    def reset_listener_callback(self, sub_msg: Bool) -> None:
+        if sub_msg.data:
+            self.curr_reward_gate = 0
 
 
 def main(args=None):
