@@ -24,6 +24,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
+            'basic_algo = driver.basic_algo:main'
             'agent_env_node = driver.agent_env_node:main',
             'env_data_service_node = driver.env_data_service_node:main'
         ],
