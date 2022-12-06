@@ -38,16 +38,42 @@ class AgentEnvNode(Node):
         while not self.env_data_client.wait_for_service(timeout_sec=1.0):
             self.get_logger().info('service not available, waiting again...')
 
-    def send_env_data_request(self):
+    def send_env_data_request(self) -> VehicleEnvData:
         env_data_future = self.env_data_client.call_async(self.env_data_req)
         rclpy.spin_until_future_complete(self, env_data_future)
         return env_data_future.result()
 
     @staticmethod
     def action_sample() -> tuple[float, float]:
+        """
+        This function returns a sample of the action space that can be used inside the environment.
+
+        Returns:
+            tuple[float, float] - a tuple contains two random floats for velocity and angle
+        """
         return (random.random() * 2 - 1), (random.random() * 2 - 1)
 
     def observation_request(self) -> VehicleEnvData:
+        """
+        This functions returns an observation of the simulation.
+        NOTE: you can not deconstruct this into a tuple as it returns the service object.
+
+
+        Example:
+            obs = AgentEnvNode().observation_request()
+
+            lidar_data = obs.lidar
+
+            imu_data = obs.imu
+
+            reward = obs.reward
+
+            termination = obs.termination
+
+        Returns:
+            service_interface.srv.VehicleEnvData
+
+        """
         return self.send_env_data_request()
 
     def action_request(self, linear: float, angle: float):

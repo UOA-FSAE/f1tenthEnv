@@ -53,16 +53,13 @@ class EnvDataServiceNode(Node):
         self.subscriber_mf.registerCallback(self.message_filter_callback)
 
     def get_data_service(self, request, response):
-        print('running service')
         response.lidar = self.lidar_data
-        print('sent lidar data')
         response.imu = self.imu_data
-        print('sent imu data')
         response.reward = self.reward_data
-        print('sent reward data')
         response.termination = self.termination_data
-        print('sent termination data')
-        print('ending service')
+
+        self.reward_data.data = 0
+        self.termination_data.data = False
 
         return response
 
