@@ -51,7 +51,7 @@ class AgentEnvNode(Node):
         Returns:
             tuple[float, float] - a tuple contains two random floats for velocity and angle
         """
-        return (random.random() * 2 - 1), (random.random() * 2 - 1)
+        return (random.random() * 2 - 0.5), (random.random() * 2 - 1)
 
     def observation_request(self) -> VehicleEnvData:
         """

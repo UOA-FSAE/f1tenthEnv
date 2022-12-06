@@ -1,6 +1,8 @@
 import rclpy
 from rclpy.node import Node
 
+from copy import deepcopy
+
 from std_msgs.msg import Int32, Bool
 from sensor_msgs.msg import LaserScan, Imu
 from service_interface.srv import VehicleEnvData
@@ -53,10 +55,10 @@ class EnvDataServiceNode(Node):
         self.subscriber_mf.registerCallback(self.message_filter_callback)
 
     def get_data_service(self, request, response):
-        response.lidar = self.lidar_data
-        response.imu = self.imu_data
-        response.reward = self.reward_data
-        response.termination = self.termination_data
+        response.lidar = deepcopy(self.lidar_data)
+        response.imu = deepcopy(self.imu_data)
+        response.reward = deepcopy(self.reward_data)
+        response.termination = deepcopy(self.termination_data)
 
         self.reward_data.data = 0
         self.termination_data.data = False
