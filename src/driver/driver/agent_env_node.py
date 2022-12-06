@@ -1,6 +1,8 @@
 import rclpy
 from rclpy.node import Node
+
 import time
+import random
 
 from std_msgs.msg import Bool, Empty
 from geometry_msgs.msg import Vector3, Twist
@@ -41,7 +43,11 @@ class AgentEnvNode(Node):
         rclpy.spin_until_future_complete(self, env_data_future)
         return env_data_future.result()
 
-    def observation_request(self) -> tuple[list[float], tuple[list[float], list[float], list[float]], int, bool]:
+    @staticmethod
+    def action_sample() -> tuple[float, float]:
+        return (random.random() * 2 - 1), (random.random() * 2 - 1)
+
+    def observation_request(self) -> VehicleEnvData:
         return self.send_env_data_request()
 
     def action_request(self, linear: float, angle: float):
