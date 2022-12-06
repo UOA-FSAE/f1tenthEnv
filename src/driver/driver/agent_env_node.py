@@ -44,6 +44,7 @@ class AgentEnvNode(Node):
         return self.send_env_data_request()
 
     def action_request(self, linear: float, angle: float):
+
         twist_msg: Twist = Twist()
 
         vec3_linear: Vector3 = Vector3()
@@ -59,7 +60,6 @@ class AgentEnvNode(Node):
         twist_msg.angular = vec3_angle
 
         self.publisher_cmd_vel.publish(twist_msg)
-        rclpy.spin_once(self)
 
     def reset_env_request(self):
         reset_msg = Bool()
