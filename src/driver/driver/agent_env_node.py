@@ -4,7 +4,7 @@ from rclpy.node import Node
 from std_msgs.msg import Bool, Empty
 from geometry_msgs.msg import Vector3, Twist
 
-from service_interface.src import VehicleEnvData
+from service_interface.srv import VehicleEnvData
 
 
 class AgentEnvNode(Node):
@@ -30,10 +30,13 @@ class AgentEnvNode(Node):
         )
 
         # -------------------------- service ----------------------------------------------------- #
-        self.env_data_client = self.create_client(VehicleEnvData, 'vehicle_env_data')
+        self.env_data_client = self.create_client(VehicleEnvData, 'get_env_data')
+        self.env_data_req = VehicleEnvData.Request()
+        while not self.env_data_client.wait_for_service(timeout_sec=1.0):
+            self.get_logger().info('service not available, waiting again...')
 
     def send_env_data_request(self):
-        env_data_future = self.env_data_client.call_async(Empty())
+        env_data_future = self.env_data_client.call_async(self.env_data_req)
         rclpy.spin_until_future_complete(self, env_data_future)
         return env_data_future.result()
 
@@ -45,13 +48,18 @@ class AgentEnvNode(Node):
 
         vec3_linear: Vector3 = Vector3()
         vec3_linear.x = linear
+        vec3_linear.y = 0.0
+        vec3_linear.z = 0.0
         twist_msg.linear = vec3_linear
 
         vec3_angle: Vector3 = Vector3()
+        vec3_angle.x = 0.0
+        vec3_angle.y = 0.0
         vec3_angle.z = angle
         twist_msg.angular = vec3_angle
 
         self.publisher_cmd_vel.publish(twist_msg)
+        rclpy.spin_once(self)
 
     def reset_env_request(self):
         reset_msg = Bool()
