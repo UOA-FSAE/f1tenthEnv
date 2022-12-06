@@ -1,5 +1,6 @@
 import rclpy
 from rclpy.node import Node
+import time
 
 from std_msgs.msg import Bool, Empty
 from geometry_msgs.msg import Vector3, Twist
@@ -65,6 +66,7 @@ class AgentEnvNode(Node):
         reset_msg = Bool()
         reset_msg.data = True
         self.publisher_reset.publish(reset_msg)
+        time.sleep(1)
 
 
 def main(args=None):

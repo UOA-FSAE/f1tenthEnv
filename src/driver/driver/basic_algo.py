@@ -10,6 +10,9 @@ def main(args=None):
     agent_env_node.get_logger().info("------------- Starting the training -------------")
 
     while True:
+        agent_env_node.reset_env_request()
+        agent_env_node.get_logger().info("------------- Reset Requested --------------")
+
         agent_env_node.action_request(1.0, 0.0)
         agent_env_node.get_logger().info("------------- Action Requested -------------")
         time.sleep(5)
