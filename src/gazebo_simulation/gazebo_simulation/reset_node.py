@@ -6,15 +6,24 @@ from rclpy.node import Node
 from rclpy.subscription import Subscription
 
 from std_msgs.msg import Bool
+from ros_gz_interfaces.srv import ControlWorld
+from ros_gz_interfaces.msg import WorldControl, WorldReset
 
 
 class ResetNode(Node):
 
     def __init__(self):
         super().__init__('reset_node')
+
+        self.client = self.create_client(ControlWorld, '/world/car_world/control')
+
+        while not self.client.wait_for_service(timeout_sec=1.0):
+            self.get_logger().info("Control service not available, waiting again")
+
+        self.request = ControlWorld.Request()
         self.current_vehicle_id = 'f1tenth'
 
-        self.subcriber_reset: Subscription = self.create_subscription(
+        self.subscriber_reset: Subscription = self.create_subscription(
             Bool,
             'reset',
             self.reset_callback,
@@ -22,15 +31,23 @@ class ResetNode(Node):
         )
 
     def reset_callback(self, sub_msg: Bool):
-
+        self.get_logger().info("Reset Topic Triggered!")
         if sub_msg.data:
-            os.system("gz service -s /world/car_world/remove --reqtype gz.msgs.Entity --reptype gz.msgs.Boolean --timeout "
-                      f"1000 --req 'name:\"{self.current_vehicle_id}\", type:2'")
+            self.send_reset_request()
 
-            self.current_vehicle_id = str(uuid.uuid4())
+    def send_reset_request(self) -> ControlWorld:
 
-            os.system("gz service -s /world/car_world/create --reqtype gz.msgs.EntityFactory --reptype gz.msgs.Boolean "
-                      f"--timeout 1000 --req 'sdf_filename: \"f1tenth_track_sdf/car.sdf\", name: \"{self.current_vehicle_id}\"'")
+        self.request.world_control = WorldControl()
+        world_reset = WorldReset()
+        world_reset.all = True
+
+        self.request.world_control.reset = world_reset
+
+        future = self.client.call_async(self.request)
+        self.get_logger().info("Entering Spin")
+        rclpy.spin_until_future_complete(self, future, timeout_sec=1)
+        self.get_logger().info("Exiting Spin")
+        return future.result()
 
 
 def main(args=None):
@@ -38,7 +55,11 @@ def main(args=None):
 
     reset_node = ResetNode()
 
-    rclpy.spin(reset_node)
+    reset_node.get_logger().info("Spinning Reset Node...")
+    rclpy.spin_once(reset_node)
+    rclpy.spin_once(reset_node)
+    rclpy.spin_once(reset_node)
+    reset_node.get_logger().info("Reset Node Stopped Spinning...")
 
     # Destroy the node explicitly
     # (optional - otherwise it will be done automatically

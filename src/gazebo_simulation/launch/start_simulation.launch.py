@@ -40,6 +40,7 @@ def generate_launch_description():
             f'/imu@{gz_to_ros_message_type["gz.msgs.IMU"]}@gz.msgs.IMU',
             f'/navsat@{gz_to_ros_message_type["gz.msgs.NavSat"]}@gz.msgs.NavSat',
             f'/reset@{gz_to_ros_message_type["gz.msgs.Boolean"]}@gz.msgs.Boolean',
+            f'/world/car_world/control@ros_gz_interfaces/srv/ControlWorld'
         ]
 
     )
@@ -57,13 +58,12 @@ def generate_launch_description():
     reset_node = Node(
         package='gazebo_simulation',
         executable='reset_node',
-        output='screen'
+        # output='screen'
     )
 
     return LaunchDescription([
         gz_sim,
-        gz_bridge,
-        reward_gate_node,
-        termination_node,
-        reset_node
+        gz_bridge
+        # reward_gate_node,
+        # termination_node
     ])

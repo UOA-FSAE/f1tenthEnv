@@ -5,6 +5,8 @@ from rclpy.subscription import Subscription
 
 from sensor_msgs.msg import LaserScan
 from std_msgs.msg import Bool, Int32
+from ros_gz_interfaces.srv import ControlWorld
+from ros_gz_interfaces.msg import WorldControl, WorldReset
 
 
 class TerminationNode(Node):
@@ -48,6 +50,20 @@ class TerminationNode(Node):
             self.reward_callback,
             10
         )
+        self.subscriber_reset: Subscription = self.create_subscription(
+            Bool,
+            'reset',
+            self.reset_callback,
+            10
+        )
+
+        # Resetting Simulation
+        self.client = self.create_client(ControlWorld, '/world/car_world/control')
+
+        while not self.client.wait_for_service(timeout_sec=1.0):
+            self.get_logger().info("Control service not available, waiting again")
+
+        self.request = ControlWorld.Request()
 
     def lidar_callback(self, sub_msg: LaserScan) -> None:
         if min(sub_msg.ranges) <= self.COLLISION_RANGE_:
@@ -57,12 +73,16 @@ class TerminationNode(Node):
         if sub_msg.data != 0:
             self.reward_timer.reset()
 
+    def reset_callback(self, sub_msg: Bool) -> None:
+        self.get_logger().info("Reset Triggered!")
+        if sub_msg.data:
+            self.terminate_sim()
+
     def timer_callback(self) -> None:
         self.terminate_sim()
 
     def terminate_sim(self):
-        reset_msg = Bool()
-        reset_msg.data = True
+        self.get_logger().info("Simulation Restarting...")
 
         reward_msg = Int32()
         reward_msg.data = self.NEGATIVE_REWARD_
@@ -70,9 +90,15 @@ class TerminationNode(Node):
         self.reward_timer.reset()
         self.publisher_reward.publish(reward_msg)
 
-        self.publisher_reset.publish(reset_msg)
-        self.publisher_termination.publish(reset_msg)
+        self.request.world_control = WorldControl()
 
+        world_reset = WorldReset()
+        world_reset.all = True
+
+        self.request.world_control.reset = world_reset
+
+        # TODO: find out why the future isn't returning anything, even though it is successful
+        self.client.call_async(self.request)
 
 def main(args=None):
     rclpy.init(args=args)

@@ -49,7 +49,7 @@ class EnvDataServiceNode(Node):
             [self.subscriber_lidar,
              self.subscriber_imu],
 
-            queue_size=10,
+            queue_size=1,
             slop=0.1
         )
         self.subscriber_mf.registerCallback(self.message_filter_callback)
@@ -70,12 +70,12 @@ class EnvDataServiceNode(Node):
         self.imu_data = imu_msg
 
     def reward_callback(self, reward_msg):
-        if self.reward_data.data == 0:
-            self.reward_data = reward_msg
+        # if self.reward_data.data == 0:
+        self.reward_data = reward_msg
 
     def termination_callback(self, termination_msg):
-        if not self.termination_data.data:
-            self.termination_data = termination_msg
+        # if not self.termination_data.data:
+        self.termination_data = termination_msg
 
 
 def main(args=None):

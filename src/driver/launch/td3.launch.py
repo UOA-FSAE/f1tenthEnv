@@ -15,19 +15,24 @@ def generate_launch_description():
             os.path.join(pkg_gazebo_simulation, 'start_simulation.launch.py')),
     )
 
-    td3_node = Node(
-        package="driver",
-        executable="TD3",
-        output='screen'
-    )
+    # td3_node = Node(
+    #     package="driver",
+    #     executable="TD3",
+    #     output='screen'
+    # )
 
-    data_env_service = Node(
+    environment = Node(
         package="driver",
-        executable="env_data_service_node"
+        executable="training_node",
+        output="screen"
     )
+    # data_env_service = Node(
+    #     package="driver",
+    #     executable="env_data_service_node"
+    # )
 
     return LaunchDescription([
         gz_sim,
-        td3_node,
-        data_env_service,
+        environment
+        # data_env_service,
     ])
