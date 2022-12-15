@@ -63,6 +63,14 @@ class Environment(Node):
         # Termination Stuff --------------------------------------------------------------------------------------------
         self.COLLISION_RANGE_: float = 0.115
 
+    def spin_once(self):
+        # This is a bad fix due to ros_gz_bridge node callback closing the message filter callback and so never
+        # gets data.
+
+        self.has_spun = False
+        while not self.has_spun:
+            rclpy.spin_once(self)
+
     def apply_action(self, linear_vel, angular_vel):
         self.get_logger().info("Taking an action!")
         twist_msg: Twist = Twist()
@@ -160,9 +168,8 @@ class Environment(Node):
         self.reset_request.world_control.reset = world_reset
 
         # TODO: find out why the future isn't returning anything, even though it is successful
-        self.reset_client.call(self.reset_request)
-
-        rclpy.spin_once(self)  # this triggers callbacks to check if we need to reset etc
+        self.reset_client.call_async(self.reset_request)
+        self.spin_once()
 
         return self.get_observation()
 
