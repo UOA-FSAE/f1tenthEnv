@@ -12,6 +12,7 @@ gz_to_ros_message_type = {
     'gz.msgs.IMU': 'sensor_msgs/msg/Imu',
     'gz.msgs.NavSat': 'sensor_msgs/msg/NavSatFix',
     'gz.msgs.Boolean': 'std_msgs/msg/Bool',
+    'gz.msgs.Pose': 'geometry_msgs/msg/PoseStamped'
 }
 
 gz_launch_file = 'f1tenth_track_sdf/empty.sdf'

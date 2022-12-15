@@ -32,7 +32,7 @@
             <direction>-0.5 0.1 -0.9</direction>
         </light>
 
-        <!-- Set the coordinates for the world origin -->
+<!--         Set the coordinates for the world origin-->
         <spherical_coordinates>
           <surface_model>EARTH_WGS84</surface_model>
           <world_frame_orientation>ENU</world_frame_orientation>
@@ -41,7 +41,7 @@
           <elevation>0</elevation>
           <heading_deg>0</heading_deg>
         </spherical_coordinates>
-	
+
 	    <!-- RACE TRACK ____________________________________________________ -->
         <model name="ground_plane">
             <static>true</static>

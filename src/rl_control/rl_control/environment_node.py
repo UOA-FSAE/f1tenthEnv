@@ -22,7 +22,7 @@ class Environment(Node):
         # Data Fields --------------------------------------------------------------------------------------------------
         self.lidar_data: LaserScan = LaserScan()
         self.imu_data: Imu = Imu()
-        self.navsat_data: NavSatFix = NavSatFix()  # Only works in sim
+        self.pose = (0.0, 0.0)
 
         # Data Subscriptions -------------------------------------------------------------------------------------------
         self.subscriber_lidar = message_filters.Subscriber(self, LaserScan, 'lidar')
@@ -57,7 +57,8 @@ class Environment(Node):
 
         # Reward Stuff -------------------------------------------------------------------------------------------------
         self.last_reward_time = time.monotonic()
-        self.reward_pos = NavSatFix()
+        self.reward_pos = (0.0, 0.0)
+
         self.generate_reward()
 
         # Termination Stuff --------------------------------------------------------------------------------------------
@@ -135,25 +136,28 @@ class Environment(Node):
         return False
 
     def generate_reward(self):
-        self.reward_pos.longitude = (random() * 6e-5) - 3e-5
-        self.reward_pos.latitude = (random() * 6e-5) - 3e-5
+        self.reward_pos.longitude = (random() * 6) - 3
+        self.reward_pos.latitude = (random() * 6) - 3
 
     def calculate_reward(self) -> float:
-        if abs(self.navsat_data.latitude - self.reward_pos.latitude) <= 1e-5 or \
-                abs(self.navsat_data.longitude - self.reward_pos.longitude) <= 1e-5:
+        if sqrt(
+            pow(self.pose[0] - self.reward_pos[0], 2) +
+            pow(self.pose[1] - self.reward_pos[1], 2)
+        ).real <= 0.2:
             self.generate_reward()
             return 100.0
 
-        return sqrt(
-            pow(self.navsat_data.latitude - self.reward_pos.latitude, 2) +
-            pow(self.navsat_data.longitude - self.reward_pos.longitude, 2)
+        return 10. - sqrt(
+            pow(self.pose[0] - self.reward_pos[0], 2) +
+            pow(self.pose[1] - self.reward_pos[1], 2)
         ).real
 
     def get_observation(self, reward=0, terminated=False):
         # TODO: Add more to observation
+        # Pose/Encoder = (x,y) | (log, lat)
         # Pose, Encoder, Velocity (IMU), LIDAR, Depth Camera
         # Return the step data: Observation, Reward, Terminated, Truncated, Info
-        return [self.navsat_data, self.reward_pos, self.imu_data, self.lidar_data], reward, terminated, None, None
+        return [self.pose, self.reward_pos, self.imu_data, self.lidar_data], reward, terminated, None, None
 
     def reset(self):
         # Service call to reset the simulation
@@ -174,8 +178,8 @@ class Environment(Node):
         return self.get_observation()
 
     # Callbacks
-    def message_filter_callback(self, lidar_msg, imu_msg, navsat_msg):
+    def message_filter_callback(self, lidar_msg, imu_msg, navsat_msg: NavSatFix):
         self.has_spun = True
         self.lidar_data = lidar_msg
         self.imu_data = imu_msg
-        self.navsat_data = navsat_msg
+        self.pose = (navsat_msg.longitude * 1e5, navsat_msg.latitude * 1e5)
