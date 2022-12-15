@@ -14,7 +14,7 @@ gz_to_ros_message_type = {
     'gz.msgs.Boolean': 'std_msgs/msg/Bool',
 }
 
-gz_launch_file = 'f1tenth_track_sdf/f1tenth_world.sdf'
+gz_launch_file = 'f1tenth_track_sdf/empty.sdf'
 hz = '1000'
 
 
