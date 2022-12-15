@@ -1,3 +1,6 @@
+from random import random
+from cmath import sqrt
+
 import rclpy
 from rclpy.node import Node
 
@@ -52,29 +55,9 @@ class Environment(Node):
         self.reset_request = ControlWorld.Request()
 
         # Reward Stuff -------------------------------------------------------------------------------------------------
-        # TODO: Note that reward gates won't work on real robot, so eventually remove
-
-        self.curr_reward_gate: int = 0
-        self.POSITIVE_REWARD: int = 10
         self.last_reward_time = time.monotonic()
-
-        self.reward_gates: dict[int: (float, float, float, float)] = {
-            0: (-1.45e-05, 1.27e-05, 2.00e-05, 3.00e-05),
-            1: (-1.45e-05, 1.27e-05, 7.00e-05, 8.00e-05),
-            2: (-1.45e-05, 1.27e-05, 0.00015, 0.00016),
-            3: (-2.54e-05, -1.84e-05, 0.000169, 0.000196),
-            4: (-5.80E-05, -3.19E-05, 0.000156, 0.000161),
-            5: (-0.0001, -9.37E-05, 9.33E-05, 0.000116),
-            6: (-0.000131, -0.000106, 0.000148, 0.000156),
-            7: (-0.000151, -0.000142, 0.000178, 0.000204),
-            8: (-0.000232, -0.000207, 9.70E-05, 0.000107),
-            9: (-0.00023, -0.000205, 2.79E-05, 3.59E-05),
-            10: (-0.000227, -0.000203, -2.19E-05, -1.49E-05),
-            11: (-0.000197, -0.000192, -5.00E-05, -2.72E-05),
-            12: (-0.000123, -0.000117, -1.47E-05, 1.05E-05),
-            13: (-8.46E-05, -7.43E-05, -1.49E-05, 1.05E-05),
-            14: (-2.50E-05, -1.76E-05, -5.23E-05, -2.78E-05),
-        }
+        self.reward_pos = NavSatFix()
+        self.generate_reward()
 
         # Termination Stuff --------------------------------------------------------------------------------------------
         self.COLLISION_RANGE_: float = 0.115
@@ -142,20 +125,26 @@ class Environment(Node):
 
         return False
 
-    def calculate_reward(self) -> int:
-        lat_start, lat_end, log_start, log_end = self.reward_gates[self.curr_reward_gate]
+    def generate_reward(self):
+        self.reward_pos.longitude = (random() * 6e-5) - 3e-5
+        self.reward_pos.latitude = (random() * 6e-5) - 3e-5
 
-        reward = 0
-        if (lat_start <= self.navsat_data.latitude <= lat_end) and (log_start <= self.navsat_data.longitude <= log_end):
-            reward += 10
+    def calculate_reward(self) -> float:
+        if abs(self.navsat_data.latitude - self.reward_pos.latitude) <= 1e-5 or \
+                abs(self.navsat_data.longitude - self.reward_pos.longitude) <= 1e-5:
+            self.generate_reward()
+            return 100.0
 
-        return reward
+        return sqrt(
+            pow(self.navsat_data.latitude - self.reward_pos.latitude, 2) +
+            pow(self.navsat_data.longitude - self.reward_pos.longitude, 2)
+        ).real
 
     def get_observation(self, reward=0, terminated=False):
         # TODO: Add more to observation
         # Pose, Encoder, Velocity (IMU), LIDAR, Depth Camera
         # Return the step data: Observation, Reward, Terminated, Truncated, Info
-        return [self.lidar_data, self.imu_data], reward, terminated, None, None
+        return [self.navsat_data, self.reward_pos, self.imu_data, self.lidar_data], reward, terminated, None, None
 
     def reset(self):
         # Service call to reset the simulation
@@ -181,22 +170,3 @@ class Environment(Node):
         self.lidar_data = lidar_msg
         self.imu_data = imu_msg
         self.navsat_data = navsat_msg
-
-    # def reward_callback(self, reward_msg):
-    #     self.reward_data = reward_msg
-    #
-    # def termination_callback(self, termination_msg):
-    #     self.termination_data = termination_msg
-
-    # def navsat_listener_callback(self, sub_msg: NavSatFix) -> None:
-    #     lat_start, lat_end, log_start, log_end = self.reward_gates[self.curr_reward_gate]
-    #     if (lat_start <= sub_msg.latitude <= lat_end) and (log_start <= sub_msg.longitude <= log_end):
-    #         pub_msg = Int32()
-    #         pub_msg.data = 10
-    #
-    #         self.curr_reward_gate = (self.curr_reward_gate + 1) % 15
-    #         self.publisher_reward.publish(pub_msg)
-    #     else:
-    #         pub_msg = Int32()
-    #         pub_msg.data = 0
-    #         self.publisher_reward.publish(pub_msg)
