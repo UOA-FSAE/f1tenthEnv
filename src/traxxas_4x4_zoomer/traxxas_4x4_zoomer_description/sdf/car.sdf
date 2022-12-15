@@ -1,6 +1,21 @@
 <?xml version="1.0" ?>
 <sdf version="1.10">
+
 	<model name="f1tenth">
+        <plugin
+            filename="libgz-sim-sensors-system.so"
+            name="gz::sim::systems::Sensors">
+            <render_engine>ogre2</render_engine>
+        </plugin>
+        <plugin
+            filename="libgz-sim-imu-system.so"
+            name="gz::sim::systems::Imu">
+        </plugin>
+        <plugin
+          filename="gz-sim-navsat-system"
+          name="gz::sim::systems::NavSat">
+        </plugin>
+
 		<static>false</static>
 		<pose>0 0 0.1 0 0 0</pose>
 
