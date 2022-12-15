@@ -24,8 +24,8 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'environment_node = driver.environment_node:main',
-            'training_node = driver.training_node:main'
+            'environment_node = rl_control.environment_node:main',
+            'training_node = rl_control.training_node:main'
         ],
     },
 )

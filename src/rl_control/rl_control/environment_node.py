@@ -38,6 +38,7 @@ class Environment(Node):
             slop=0.1
         )
         self.subscriber_mf.registerCallback(self.message_filter_callback)
+        self.has_spun = False
 
         # Publishers ---------------------------------------------------------------------------------------------------
         self.publisher_cmd_vel = self.create_publisher(
@@ -97,7 +98,7 @@ class Environment(Node):
         while time.monotonic() < end_time:  # process data for X time frame
 
             # Observe the data
-            rclpy.spin_once(self)  # this triggers callbacks to check if we need to reset etc
+            self.spin_once()
 
             # Check if termination conditions are met
             terminated = self.is_terminated()
@@ -167,6 +168,8 @@ class Environment(Node):
 
     # Callbacks
     def message_filter_callback(self, lidar_msg, imu_msg, navsat_msg):
+        self.get_logger().info(f"Message callback Triggered")
+        self.has_spun = True
         self.lidar_data = lidar_msg
         self.imu_data = imu_msg
         self.navsat_data = navsat_msg

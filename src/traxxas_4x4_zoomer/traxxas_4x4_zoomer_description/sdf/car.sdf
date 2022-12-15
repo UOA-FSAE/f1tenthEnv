@@ -74,7 +74,7 @@
 		<!-- LIDAR SENSOR  _________________________________________________________________________________________________ -->
 
 		<link name="lidar">
-			<pose relative_to='chassis'>-0.25 0 0.05 0 0 3.14</pose>
+			<pose relative_to='chassis'>-0.25 0 0.3 0 0 3.14</pose>
 			<visual name="lidar_visual">
 				<geometry>
 					<mesh><uri>../mesh/lidar.stl</uri><scale>0.1 0.1 0.1</scale></mesh>
