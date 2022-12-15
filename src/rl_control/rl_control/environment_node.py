@@ -168,7 +168,6 @@ class Environment(Node):
 
     # Callbacks
     def message_filter_callback(self, lidar_msg, imu_msg, navsat_msg):
-        self.get_logger().info(f"Message callback Triggered")
         self.has_spun = True
         self.lidar_data = lidar_msg
         self.imu_data = imu_msg
