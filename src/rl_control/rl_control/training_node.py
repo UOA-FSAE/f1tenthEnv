@@ -1,7 +1,6 @@
 import rclpy
 import time
-from .agent_env_node import AgentEnvNode
-from .environment_node import Environment
+from src.rl_control.rl_control.environment_node import Environment
 # from agents import TD3Agent
 # from networks import Actor, Critic
 # from util import MemoryBuffer

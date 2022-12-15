@@ -101,7 +101,7 @@
 
         <!-- RACE CAR ______________________________________________________ -->
         <include>
-            <uri>model://f1tenth_track_sdf/car.sdf</uri>
+            <uri>model://src/traxxas_4x4_zoomer/traxxas_4x4_zoomer_description/sdf/car.sdf</uri>
         </include>
 
         <!-- Moving Forward-->

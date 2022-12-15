@@ -24,7 +24,7 @@
 			<pose relative_to='__model__'>0 0 0 0 0 3.14</pose>
 			<visual name="chassis_visual">
 				<geometry>
-					<mesh><uri>file://f1tenth_track_sdf/chassis.stl</uri><scale>0.1 0.1 0.1</scale></mesh>
+					<mesh><uri>../mesh/chassis.stl</uri><scale>0.1 0.1 0.1</scale></mesh>
 				</geometry>
 				<material>
 					<ambient>0.0 0.0 0.5 1</ambient>
@@ -51,18 +51,18 @@
 					</box>
 				</geometry>
 			</collision>
-			
-			
+
+
 		</link>
-		
+
 
 		<!-- LIDAR SENSOR  _________________________________________________________________________________________________ -->
-		
+
 		<link name="lidar">
 			<pose relative_to='chassis'>-0.25 0 0.05 0 0 3.14</pose>
 			<visual name="lidar_visual">
 				<geometry>
-					<mesh><uri>file://f1tenth_track_sdf/lidar.stl</uri><scale>0.1 0.1 0.1</scale></mesh>
+					<mesh><uri>../mesh/lidar.stl</uri><scale>0.1 0.1 0.1</scale></mesh>
 				</geometry>
 			</visual>
 			<collision name="lidar_collision">
@@ -100,14 +100,14 @@
 				<always_on>1</always_on>
 				<visualize>true</visualize>
 			</sensor>
-		
+
 		</link>
 		<!-- FRONT RIGHT WHEEL _____________________________________________________________________________________________ -->
 		<link name="front_right_wheel">
 			<pose relative_to="chassis">-0.15 0.15 0.025 -1.5707 0 0</pose>
 			<visual name="fr_wheel_visual">
 				<geometry>
-					<mesh><uri>file://f1tenth_track_sdf/wheel.stl</uri><scale>0.1 0.1 0.1</scale></mesh>
+					<mesh><uri>../mesh/wheel.stl</uri><scale>0.1 0.1 0.1</scale></mesh>
 				</geometry>
 				<material>
             				<ambient>1.0 0.0 0.0 1</ambient>
@@ -126,7 +126,7 @@
 					<izz>0.00041226</izz>
 				</inertia>
     			</inertial>
-			
+
 			<collision name="front_right_wheel_collision">
 				<pose>0 0 -0.02 0 0 0</pose>
 				<geometry>
@@ -137,13 +137,13 @@
 				</geometry>
 			</collision>
 		</link>
-		
+
 		<!-- BACK RIGHT WHEEL _____________________________________________________________________________________________ -->
 		<link name="back_right_wheel">
 			<pose relative_to="chassis">0.175 0.15 0.025 -1.5707 0 0</pose>
 			<visual name="fr_wheel_visual">
 				<geometry>
-					<mesh><uri>file://f1tenth_track_sdf/wheel.stl</uri><scale>0.1 0.1 0.1</scale></mesh>
+					<mesh><uri>../mesh/wheel.stl</uri><scale>0.1 0.1 0.1</scale></mesh>
 				</geometry>
 				<material>
             				<ambient>1.0 0.0 0.0 1</ambient>
@@ -162,7 +162,7 @@
 					<izz>0.00041226</izz>
 				</inertia>
     			</inertial>
-			
+
 			<collision name="front_right_wheel_collision">
 				<pose>0 0 -0.02 0 0 0</pose>
 				<geometry>
@@ -178,7 +178,7 @@
 			<pose relative_to="chassis">-0.15 -0.1 0.025 -1.5707 0 0</pose>
 			<visual name="fl_wheel_visual">
 				<geometry>
-					<mesh><uri>file://f1tenth_track_sdf/wheel.stl</uri><scale>0.1 0.1 0.1</scale></mesh>
+					<mesh><uri>../mesh/wheel.stl</uri><scale>0.1 0.1 0.1</scale></mesh>
 				</geometry>
 				<material>
             				<ambient>1.0 0.0 0.0 1</ambient>
@@ -207,14 +207,13 @@
 				</geometry>
 			</collision>
 		</link>
-		
+
 		<!-- BACK LEFT WHEEL _____________________________________________________________________________________________ -->
 		<link name="back_left_wheel">
 			<pose relative_to="chassis">0.175 -0.1 0.025 -1.5707 0 0</pose>
 			<visual name="fl_wheel_visual">
 				<geometry>
-					<mesh><uri>file://f1tenth_track_sdf/wheel.stl</uri><scale>0.1 0.1 0.1</scale></mesh>
-					
+					<mesh><uri>../mesh/wheel.stl</uri><scale>0.1 0.1 0.1</scale></mesh>
 				</geometry>
 				<material>
             				<ambient>1.0 0.0 0.0 1</ambient>
