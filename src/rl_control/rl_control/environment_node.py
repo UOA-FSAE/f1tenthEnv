@@ -137,7 +137,7 @@ class Environment(Node):
         if min(self.lidar_data.ranges) <= self.COLLISION_RANGE_:
             return True
 
-        if -10 > self.pose[0] > 10. or -10 > self.pose[1] > 10:
+        if self.reward_amount < -10.:
             self.reset_env()
             return True
 
