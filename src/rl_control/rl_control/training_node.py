@@ -1,4 +1,5 @@
 from math import isinf
+from random import random
 
 import rclpy
 import time
@@ -9,38 +10,29 @@ from rclpy.task import Future
 # from networks import Actor, Critic
 # from util import MemoryBuffer
 
+STEPS = 150  # Hz
+EPISODES = 10
+
 
 def main(args=None):
     rclpy.init(args=args)
     env = Environment()
     env.reset()
-    env.get_logger().info("Hello World!")
 
-    env.get_logger().info("Stepping Now!")
-    while True:
-        (pose, target, imu, lidar, odometry), reward, terminated, _, _ = env.step([1.0, 1.0])
-        lidar = list(map(lambda x: x if not isinf(x) else -1, lidar.ranges.tolist()))
-        env.get_logger().info(f"{reward=}")
+    for ep in range(EPISODES):
+        env.get_logger().info(f'{ep=}--------------------------------------------------------------')
+        env.reset()
+        for step in range(STEPS):
+            (pose, target, imu, lidar, odometry), reward, terminated, _, _ = env.step([random(), random() * 2 - 1])
 
-        if terminated:
-            env.reset()
+            velocity = (odometry.twist.twist.linear.x, odometry.twist.twist.linear.y, odometry.twist.twist.linear.z, \
+                        odometry.twist.twist.angular.x, odometry.twist.twist.angular.y, odometry.twist.twist.angular.z)
+            lidar = list(map(lambda x: x if not isinf(x) else -1, lidar.ranges.tolist()))
 
-    time.sleep(5)
-    env.get_logger().info("Resetting Simulation...")
-    env.reset()
+            env.get_logger().info(f"{step=}, {reward=}")
 
-    # env.get_logger().info("------------- Starting the training -------------")
-
-    # while True:
-    #     env.reset_env_request()
-    #     env.get_logger().info("------------- Reset Requested --------------")
-    #
-    #     env.action_request(1.0, 0.0)
-    #     env.get_logger().info("------------- Action Requested -------------")
-    #     time.sleep(5)
-
-
-    # env.get_logger().info(f"{}")
+            if terminated:
+                break
 
     env.destroy_node()
     rclpy.shutdown()

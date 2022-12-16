@@ -79,7 +79,7 @@ class Environment(Node):
             rclpy.spin_once(self)
 
     def apply_action(self, linear_vel, angular_vel):
-        self.get_logger().info("Taking an action!")
+        # self.get_logger().info("Taking an action!")
         twist_msg: Twist = Twist()
 
         vec3_linear: Vector3 = Vector3()
@@ -153,7 +153,7 @@ class Environment(Node):
             self.terminated_ = True
             return 100.0
 
-        return 10. - sqrt(
+        return -sqrt(
             pow(self.pose[0] - self.reward_pos[0], 2) +
             pow(self.pose[1] - self.reward_pos[1], 2)
         ).real
@@ -176,18 +176,18 @@ class Environment(Node):
         self.reward_amount = 0.0
         self.generate_reward()
 
-        self.reset_request.world_control = WorldControl()
-
-        world_reset = WorldReset()
-        world_reset.all = True
-
-        self.reset_request.world_control.reset = world_reset
-
-        # TODO: find out why the future isn't returning anything, even though it is successful
-        # self.reset_client.call_async(self.reset_request)
-        # self.spin_once()
-        # self.get_logger().info('PLEASE FINISH')
-        self.time_since_start = time.monotonic()
+        # self.reset_request.world_control = WorldControl()
+        #
+        # world_reset = WorldReset()
+        # world_reset.all = True
+        #
+        # self.reset_request.world_control.reset = world_reset
+        #
+        # # TODO: find out why the future isn't returning anything, even though it is successful
+        # # self.reset_client.call_async(self.reset_request)
+        # # self.spin_once()
+        # # self.get_logger().info('PLEASE FINISH')
+        # self.time_since_start = time.monotonic()
 
         return self.get_observation()
 
