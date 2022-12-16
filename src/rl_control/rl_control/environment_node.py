@@ -113,11 +113,12 @@ class Environment(Node):
         # Observe the data
         self.spin_once()
 
+        # Check if termination conditions are met
+        self.terminated_ = self.is_terminated()
+
         # Calculate Reward
         self.reward_amount = self.calculate_reward()
 
-        # Check if termination conditions are met
-        self.terminated_ = self.is_terminated()
 
         # if self.terminated_:
         #     break
@@ -134,6 +135,10 @@ class Environment(Node):
             return True
 
         if min(self.lidar_data.ranges) <= self.COLLISION_RANGE_:
+            return True
+
+        if -10 > self.pose[0] > 10. or -10 > self.pose[1] > 10:
+            self.reset_env()
             return True
 
         # if time.monotonic() - self.time_since_start >= 10:
@@ -153,6 +158,9 @@ class Environment(Node):
             self.terminated_ = True
             return 100.0
 
+        if self.terminated_:
+            return -1000.0
+
         return -sqrt(
             pow(self.pose[0] - self.reward_pos[0], 2) +
             pow(self.pose[1] - self.reward_pos[1], 2)
@@ -166,6 +174,17 @@ class Environment(Node):
 
         # recommended mapping of lidar is list(map(lambda x: x if not math.isinf(x) else -1, state[3].ranges.tolist()))
         return [self.pose, self.reward_pos, self.imu_data, self.lidar_data, self.odom_data], self.reward_amount, self.terminated_, None, None
+
+    def reset_env(self):
+        self.reset_request.world_control = WorldControl()
+
+        world_reset = WorldReset()
+        world_reset.all = True
+
+        self.reset_request.world_control.reset = world_reset
+
+        self.reset_client.call_async(self.reset_request)
+        self.spin_once()
 
     def reset(self):
         # Service call to reset the simulation
