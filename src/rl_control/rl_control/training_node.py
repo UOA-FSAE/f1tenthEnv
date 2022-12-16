@@ -1,3 +1,5 @@
+from math import isinf
+
 import rclpy
 import time
 from .environment_node import Environment
@@ -11,12 +13,18 @@ from rclpy.task import Future
 def main(args=None):
     rclpy.init(args=args)
     env = Environment()
+    env.reset()
     env.get_logger().info("Hello World!")
 
-    env.get_logger().info("Resetting Simulation...")
-    env.reset()
     env.get_logger().info("Stepping Now!")
-    state, reward, terminated, _, _ = env.step([1.0, 1.0])
+    while True:
+        (pose, target, imu, lidar, odometry), reward, terminated, _, _ = env.step([1.0, 1.0])
+        lidar = list(map(lambda x: x if not isinf(x) else -1, lidar.ranges.tolist()))
+        env.get_logger().info(f"{reward=}")
+
+        if terminated:
+            env.reset()
+
     time.sleep(5)
     env.get_logger().info("Resetting Simulation...")
     env.reset()

@@ -12,6 +12,7 @@ gz_to_ros_message_type = {
     'gz.msgs.IMU': 'sensor_msgs/msg/Imu',
     'gz.msgs.NavSat': 'sensor_msgs/msg/NavSatFix',
     'gz.msgs.Boolean': 'std_msgs/msg/Bool',
+    'gz.msgs.Odometry': 'nav_msgs/msg/Odometry',
     'gz.msgs.Pose': 'geometry_msgs/msg/PoseStamped'
 }
 
@@ -41,6 +42,7 @@ def generate_launch_description():
             f'/imu@{gz_to_ros_message_type["gz.msgs.IMU"]}@gz.msgs.IMU',
             f'/navsat@{gz_to_ros_message_type["gz.msgs.NavSat"]}@gz.msgs.NavSat',
             f'/reset@{gz_to_ros_message_type["gz.msgs.Boolean"]}@gz.msgs.Boolean',
+            f'/model/f1tenth/odometry@{gz_to_ros_message_type["gz.msgs.Odometry"]}@gz.msgs.Odometry',
             f'/world/car_world/control@ros_gz_interfaces/srv/ControlWorld'
         ]
 
