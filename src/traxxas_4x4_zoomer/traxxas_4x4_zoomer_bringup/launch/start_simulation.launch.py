@@ -41,11 +41,13 @@ def generate_launch_description():
             f'/cmd_vel@{gz_to_ros_message_type["gz.msgs.Twist"]}@gz.msgs.Twist',
             f'/imu@{gz_to_ros_message_type["gz.msgs.IMU"]}@gz.msgs.IMU',
             f'/navsat@{gz_to_ros_message_type["gz.msgs.NavSat"]}@gz.msgs.NavSat',
-            f'/reset@{gz_to_ros_message_type["gz.msgs.Boolean"]}@gz.msgs.Boolean',
             f'/model/f1tenth/odometry@{gz_to_ros_message_type["gz.msgs.Odometry"]}@gz.msgs.Odometry',
+            f'/model/f1tenth/tf@tf2_msgs/msg/TFMessage@gz.msgs.Pose_V',
             f'/world/car_world/control@ros_gz_interfaces/srv/ControlWorld'
+        ],
+        remappings=[
+            ('/model/f1tenth/tf', '/tf')
         ]
-
     )
 
     return LaunchDescription([

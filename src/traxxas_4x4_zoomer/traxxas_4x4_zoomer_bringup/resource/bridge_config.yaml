@@ -1,0 +1,29 @@
+- topic_name: "lidar"
+  ros_type_name: "sensor_msgs/msg/LaserScan"
+  gz_type_name: "gz.msgs.LaserScan"
+
+- topic_name: "cmd_vel"
+  ros_type_name: "geometry_msgs/msg/Twist"
+  gz_type_name: "gz.msgs.Twist"
+
+- topic_name: "imu"
+  ros_type_name: "sensor_msgs/msg/Imu"
+  gz_type_name: "gz.msgs.IMU"
+
+- topic_name: "navsat"
+  ros_type_name: "sensor_msgs/msg/NavSatFix"
+  gz_type_name: "gz.msgs.NavSat"
+
+- topic_name: "navsat"
+  ros_type_name: "sensor_msgs/msg/NavSatFix"
+  gz_type_name: "gz.msgs.NavSat"
+
+- ros_topic_name: "odometry"
+  gz_topic_name: "model/f1tenth/odometry"
+  ros_type_name: "nav_msgs/msg/Odometry"
+  gz_type_name: "gz.msgs.Odometry"
+
+- ros_topic_name: "tf"
+  gz_topic_name: "model/f1tenth/tf"
+  ros_type_name: "f2_msgs/msg/TFMessage"
+  gz_type_name: "gz.msgs.Pose_V"

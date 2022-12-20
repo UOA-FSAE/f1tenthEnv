@@ -1,85 +1,171 @@
-from random import random
+import time
 from cmath import sqrt
+from random import random
 
 import rclpy
+from rclpy.executors import SingleThreadedExecutor
 from rclpy.node import Node
-
-from sensor_msgs.msg import LaserScan, Imu, NavSatFix
-from geometry_msgs.msg import Vector3, Twist
-from nav_msgs.msg import Odometry
-from ros_gz_interfaces.srv import ControlWorld
-from ros_gz_interfaces.msg import WorldControl, WorldReset
-
-import time
+from rclpy.duration import Duration
 
 import message_filters
 
+from sensor_msgs.msg import LaserScan, Imu
+from nav_msgs.msg import Odometry
+from geometry_msgs.msg import Vector3, Twist, TransformStamped
+from ros_gz_interfaces.msg import WorldControl, WorldReset
+
+from ros_gz_interfaces.srv import ControlWorld
+
+from tf2_ros.buffer import Buffer as TF_Buffer
+from tf2_ros import TransformListener
+
 
 class Environment(Node):
-
-    def __init__(self):
+    def __init__(self, step_duration: float = 0.0, boundary_size: float = 10):
         super().__init__('environment')
 
-        # Data Fields --------------------------------------------------------------------------------------------------
+        # config fields
+        self.step_duration: float = step_duration
+        self.boundary_size: float = boundary_size
+
+        # Data fields
         self.lidar_data: LaserScan = LaserScan()
         self.imu_data: Imu = Imu()
         self.odom_data: Odometry = Odometry()
-        self.pose = (0.0, 0.0)
-        self.terminated_ = False
-        self.reward_amount = 0.0
+        self.tf_data: TransformStamped = TransformStamped()
+        self.reward_tf_data: TransformStamped = TransformStamped()
 
-        # Data Subscriptions -------------------------------------------------------------------------------------------
+        self.reset_request = ControlWorld.Request()
+
+        self.reward_: float = 0.0
+        self.terminated_: bool = False
+        self.has_spun: bool = False
+
+        # Data Subscriptions
         self.subscriber_lidar = message_filters.Subscriber(self, LaserScan, 'lidar')
         self.subscriber_imu = message_filters.Subscriber(self, Imu, 'imu')
-        self.subscriber_navsat = message_filters.Subscriber(self, NavSatFix, 'navsat')  # Only works in sim
         self.subscriber_odom = message_filters.Subscriber(self, Odometry, 'model/f1tenth/odometry')
 
         self.subscriber_mf = message_filters.ApproximateTimeSynchronizer(
             [self.subscriber_lidar,
              self.subscriber_imu,
-             self.subscriber_navsat,
              self.subscriber_odom],
 
             queue_size=1,
             slop=0.2
         )
         self.subscriber_mf.registerCallback(self.message_filter_callback)
-        self.has_spun = False
 
-        # Publishers ---------------------------------------------------------------------------------------------------
+        # TF buffer
+        self.tf_buffer = TF_Buffer()
+        TransformListener(self.tf_buffer, self, spin_thread=True)
+
+        # Services
+        self.reset_client = self.create_client(ControlWorld, '/world/car_world/control')
+
+        while not self.reset_client.wait_for_service(timeout_sec=1.0):
+            self.get_logger().info("Control service not available, waiting again")
+
+        # Data Publishers
         self.publisher_cmd_vel = self.create_publisher(
             Twist,
             'cmd_vel',
             10
         )
 
-        # Services -----------------------------------------------------------------------------------------------------
-        self.reset_client = self.create_client(ControlWorld, '/world/car_world/control')
+    # Public functions -------------------------------------------------------------------------------------------------
+    def step(self, action: tuple[float, float]):
+        """
 
-        while not self.reset_client.wait_for_service(timeout_sec=1.0):
-            self.get_logger().info("Control service not available, waiting again")
+        Args:
+            action: target linear velocity and angle
 
-        self.reset_request = ControlWorld.Request()
+        Returns:
+            Obs, reward, terminated, truncated, info
+        """
+        self.set_action(*action)
 
-        # Reward Stuff -------------------------------------------------------------------------------------------------
-        self.time_since_start = time.monotonic()
-        self.reward_pos = (0.0, 0.0)
+        rate = self.create_rate(20)
+        end_step_time = time.monotonic() + self.step_duration
+        while time.monotonic() < end_step_time or not self.step_duration:
+            rclpy.spin_once(self, executor=SingleThreadedExecutor())
 
-        self.generate_reward()
+            self.tf_data = self.tf_buffer.lookup_transform('f1tenth/odom', 'f1tenth/odom',
+                                                           time=rclpy.time.Time(), timeout=Duration(seconds=5))
 
-        # Termination Stuff --------------------------------------------------------------------------------------------
-        self.COLLISION_RANGE_: float = 0.115
+            self.terminated_ = self.get_is_terminated()
+            self.reward_ = self.get_reward()
 
-    def spin_once(self):
-        # This is a bad fix due to ros_gz_bridge node callback closing the message filter callback and so never
-        # gets data.
+            if self.terminated_ or not self.step_duration:
+                break
+            rate.sleep()
 
-        self.has_spun = False
-        while not self.has_spun:
-            rclpy.spin_once(self)
+        return self.get_observation()
 
-    def apply_action(self, linear_vel, angular_vel):
-        # self.get_logger().info("Taking an action!")
+    def reset(self):
+        """
+        Note: this function will take a while to reset the env after you make an action and your guess is as good as
+        mine as to why this happens
+
+
+        Returns:
+            Obs, reward, terminated, truncated, info
+        """
+
+        self.reset_request.world_control = WorldControl()
+
+        world_reset = WorldReset()
+        world_reset.all = True
+
+        self.reset_request.world_control.reset = world_reset
+
+        self.reset_client.call_async(self.reset_request)
+
+        rclpy.spin_once(self, executor=SingleThreadedExecutor(), timeout_sec=1)
+        self.tf_data = self.tf_buffer.lookup_transform('f1tenth/odom', 'f1tenth/odom',
+                                                       time=rclpy.time.Time(), timeout=Duration(seconds=5))
+
+        self.set_reward()
+        return self.get_observation()
+
+    # Get functions ----------------------------------------------------------------------------------------------------
+    def get_observation(self):
+        return [self.tf_data, self.reward_tf_data, self.imu_data, self.lidar_data, self.odom_data], \
+            self.reward_, self.terminated_, None, None
+
+    def get_reward(self) -> float:
+        self.get_logger().info(f'{self.tf_data=}')
+        if sqrt(
+            pow(self.tf_data.transform.translation.x - self.reward_tf_data.transform.translation.x
+                , 2) +
+            pow(self.tf_data.transform.translation.y - self.reward_tf_data.transform.translation.y
+                , 2)
+        ).real <= 0.2:
+            self.terminated_ = True
+            return 100.0
+
+        if self.terminated_:
+            return -100.0
+
+        return -sqrt(
+            pow(self.tf_data.transform.translation.x - self.reward_tf_data.transform.translation.x
+                , 2) +
+            pow(self.tf_data.transform.translation.y - self.reward_tf_data.transform.translation.y
+                , 2)
+        ).real
+
+    def get_is_terminated(self) -> bool:
+        # terminates if out of bounds
+        if self.tf_data.transform.translation.x > self.boundary_size or \
+                self.tf_data.transform.translation.y > self.boundary_size or \
+                self.tf_data.transform.translation.x < -self.boundary_size or \
+                self.tf_data.transform.translation.y < -self.boundary_size:
+            return True
+
+        return False
+
+    # Set functions ----------------------------------------------------------------------------------------------------
+    def set_action(self, linear_vel: float, angular_vel: float):
         twist_msg: Twist = Twist()
 
         vec3_linear: Vector3 = Vector3()
@@ -96,124 +182,13 @@ class Environment(Node):
 
         self.publisher_cmd_vel.publish(twist_msg)
 
-    def step(self, action):
+    def set_reward(self):
+        self.reward_tf_data = self.tf_data
+        self.reward_tf_data.transform.translation.x = random() * 20 - 10
+        self.reward_tf_data.transform.translation.y = random() * 20 - 10
 
-        # Take the Action
-        lin_vel, ang_vel = action
-        self.apply_action(lin_vel, ang_vel)
-
-        # Process action for X time period and observe state
-
-        # This specific implementation of waiting for X time period should be improved
-        # rate = self.create_rate(20)
-
-        # end_time = time.monotonic() + 0.1
-        # while time.monotonic() < end_time:  # process data for X time frame
-
-        # Observe the data
-        self.spin_once()
-
-        # Check if termination conditions are met
-        self.terminated_ = self.is_terminated()
-
-        # Calculate Reward
-        self.reward_amount = self.calculate_reward()
-
-
-        # if self.terminated_:
-        #     break
-
-        # Run at X Hz
-        # rate.sleep()
-
-        # Calculated the reward gained
-
-        return self.get_observation()
-
-    def is_terminated(self) -> bool:
-        if self.terminated_:
-            return True
-
-        if min(self.lidar_data.ranges) <= self.COLLISION_RANGE_:
-            return True
-
-        if self.reward_amount < -10.:
-            self.reset_env()
-            return True
-
-        # if time.monotonic() - self.time_since_start >= 10:
-        #     self.reward_amount = -10.0
-        #     return True
-
-        return False
-
-    def generate_reward(self):
-        self.reward_pos = ((random() * 6) - 3, (random() * 6) - 3)
-
-    def calculate_reward(self) -> float:
-        if sqrt(
-            pow(self.pose[0] - self.reward_pos[0], 2) +
-            pow(self.pose[1] - self.reward_pos[1], 2)
-        ).real <= 0.2:
-            self.terminated_ = True
-            return 100.0
-
-        if self.terminated_:
-            return -1000.0
-
-        return -sqrt(
-            pow(self.pose[0] - self.reward_pos[0], 2) +
-            pow(self.pose[1] - self.reward_pos[1], 2)
-        ).real
-
-    def get_observation(self):
-        # TODO: Add more to observation
-        # Pose/Encoder = (x,y) | (log, lat)
-        # Pose, Encoder, Velocity (IMU), LIDAR, Depth Camera
-        # Return the step data: Observation, Reward, Terminated, Truncated, Info
-
-        # recommended mapping of lidar is list(map(lambda x: x if not math.isinf(x) else -1, state[3].ranges.tolist()))
-        return [self.pose, self.reward_pos, self.imu_data, self.lidar_data, self.odom_data], self.reward_amount, self.terminated_, None, None
-
-    def reset_env(self):
-        self.reset_request.world_control = WorldControl()
-
-        world_reset = WorldReset()
-        world_reset.all = True
-
-        self.reset_request.world_control.reset = world_reset
-
-        self.reset_client.call_async(self.reset_request)
-        self.spin_once()
-
-    def reset(self):
-        # Service call to reset the simulation
-        # self.reward_timer.reset()
-        # self.publisher_reward.publish(reward_msg)
-
-        self.terminated_ = False
-        self.reward_amount = 0.0
-        self.generate_reward()
-
-        # self.reset_request.world_control = WorldControl()
-        #
-        # world_reset = WorldReset()
-        # world_reset.all = True
-        #
-        # self.reset_request.world_control.reset = world_reset
-        #
-        # # TODO: find out why the future isn't returning anything, even though it is successful
-        # # self.reset_client.call_async(self.reset_request)
-        # # self.spin_once()
-        # # self.get_logger().info('PLEASE FINISH')
-        # self.time_since_start = time.monotonic()
-
-        return self.get_observation()
-
-    # Callbacks
-    def message_filter_callback(self, lidar_msg, imu_msg, navsat_msg: NavSatFix, odom_msg):
-        self.has_spun = True
+    # Callbacks --------------------------------------------------------------------------------------------------------
+    def message_filter_callback(self, lidar_msg: LaserScan, imu_msg: Imu, odom_msg: Odometry):
         self.lidar_data = lidar_msg
         self.imu_data = imu_msg
-        self.pose = (navsat_msg.longitude * 1e5, navsat_msg.latitude * 1e5)
         self.odom_data = odom_msg
