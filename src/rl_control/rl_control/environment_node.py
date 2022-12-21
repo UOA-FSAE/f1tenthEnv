@@ -11,6 +11,7 @@ import message_filters
 
 from sensor_msgs.msg import LaserScan, Imu
 from nav_msgs.msg import Odometry
+from std_msgs.msg import Empty
 from geometry_msgs.msg import Vector3, Twist, TransformStamped
 from ros_gz_interfaces.msg import WorldControl, WorldReset
 
@@ -21,12 +22,13 @@ from tf2_ros import TransformListener
 
 
 class Environment(Node):
-    def __init__(self, step_duration: float = 0.0, boundary_size: float = 10):
+    def __init__(self, step_duration: float = 1.0, boundary_size: float = 10):
         super().__init__('environment')
 
         # config fields
         self.step_duration: float = step_duration
         self.boundary_size: float = boundary_size
+        self.spin_flag: bool = False
 
         # Data fields
         self.lidar_data: LaserScan = LaserScan()
@@ -76,6 +78,7 @@ class Environment(Node):
     # Public functions -------------------------------------------------------------------------------------------------
     def step(self, action: tuple[float, float]):
         """
+        Use this function to take a step in the simulation.
 
         Args:
             action: target linear velocity and angle
@@ -87,16 +90,15 @@ class Environment(Node):
 
         rate = self.create_rate(20)
         end_step_time = time.monotonic() + self.step_duration
-        while time.monotonic() < end_step_time or not self.step_duration:
-            rclpy.spin_once(self, executor=SingleThreadedExecutor())
+        while time.monotonic() < end_step_time:
 
-            self.tf_data = self.tf_buffer.lookup_transform('f1tenth/odom', 'f1tenth/odom',
+            self.tf_data = self.tf_buffer.lookup_transform('f1tenth/odom', 'f1tenth/chassis',
                                                            time=rclpy.time.Time(), timeout=Duration(seconds=5))
 
             self.terminated_ = self.get_is_terminated()
             self.reward_ = self.get_reward()
 
-            if self.terminated_ or not self.step_duration:
+            if self.terminated_:
                 break
             rate.sleep()
 
@@ -104,6 +106,8 @@ class Environment(Node):
 
     def reset(self):
         """
+        This function resets the world
+
         Note: this function will take a while to reset the env after you make an action and your guess is as good as
         mine as to why this happens
 
@@ -111,18 +115,17 @@ class Environment(Node):
         Returns:
             Obs, reward, terminated, truncated, info
         """
+        #
+        # self.reset_request.world_control = WorldControl()
+        #
+        # world_reset = WorldReset()
+        # world_reset.all = True
+        #
+        # self.reset_request.world_control.reset = world_reset
+        #
+        # self.reset_client.call_async(self.reset_request)
 
-        self.reset_request.world_control = WorldControl()
-
-        world_reset = WorldReset()
-        world_reset.all = True
-
-        self.reset_request.world_control.reset = world_reset
-
-        self.reset_client.call_async(self.reset_request)
-
-        rclpy.spin_once(self, executor=SingleThreadedExecutor(), timeout_sec=1)
-        self.tf_data = self.tf_buffer.lookup_transform('f1tenth/odom', 'f1tenth/odom',
+        self.tf_data = self.tf_buffer.lookup_transform('f1tenth/odom', 'f1tenth/chassis',
                                                        time=rclpy.time.Time(), timeout=Duration(seconds=5))
 
         self.set_reward()
@@ -134,7 +137,6 @@ class Environment(Node):
             self.reward_, self.terminated_, None, None
 
     def get_reward(self) -> float:
-        self.get_logger().info(f'{self.tf_data=}')
         if sqrt(
             pow(self.tf_data.transform.translation.x - self.reward_tf_data.transform.translation.x
                 , 2) +
@@ -156,11 +158,11 @@ class Environment(Node):
 
     def get_is_terminated(self) -> bool:
         # terminates if out of bounds
-        if self.tf_data.transform.translation.x > self.boundary_size or \
-                self.tf_data.transform.translation.y > self.boundary_size or \
-                self.tf_data.transform.translation.x < -self.boundary_size or \
-                self.tf_data.transform.translation.y < -self.boundary_size:
-            return True
+        # if self.tf_data.transform.translation.x > self.boundary_size or \
+        #         self.tf_data.transform.translation.y > self.boundary_size or \
+        #         self.tf_data.transform.translation.x < -self.boundary_size or \
+        #         self.tf_data.transform.translation.y < -self.boundary_size:
+        #     return True
 
         return False
 
@@ -189,6 +191,8 @@ class Environment(Node):
 
     # Callbacks --------------------------------------------------------------------------------------------------------
     def message_filter_callback(self, lidar_msg: LaserScan, imu_msg: Imu, odom_msg: Odometry):
+        self.spin_flag = True
+
         self.lidar_data = lidar_msg
         self.imu_data = imu_msg
         self.odom_data = odom_msg
