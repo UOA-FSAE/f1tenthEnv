@@ -30,7 +30,7 @@ colcon build
 . install/setup.bash
 
 # Start the Simulation
-ros2 launch gazebo_simulation start_simulation.launch.py 
+ros2 launch traxxas_4x4_zoomer_bringup start_simulation.launch.py 
 
 ```
 
